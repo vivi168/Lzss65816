@@ -123,10 +123,15 @@ int getbit(int n) /* get n bits */
             if ((buf = fgetc(infile)) == EOF) return EOF;
             mask = 128;
         }
+
         x <<= 1;
-        if (buf & mask) x++;
+
+        if (buf & mask) {
+            x++;
+        }
         mask >>= 1;
     }
+
     return x;
 }
 
@@ -150,8 +155,7 @@ void decode(void)
 
             fputc(byte, outfile);
             buffer[r] = byte;
-            r += 1;
-            r &= (N - 1);
+            r = (r + 1) & (N - 1);
         } else {
             i = getbit(EI);
             j = getbit(EJ);
@@ -164,8 +168,7 @@ void decode(void)
                 c = buffer[(i + k) & (N - 1)];
                 fputc(c, outfile);
                 buffer[r] = c;
-                r += 1;
-                r &= (N - 1);
+                r = (r + 1) & (N - 1);
             }
         }
     }
