@@ -120,7 +120,12 @@ int getbit(int n) /* get n bits */
     x = 0;
     for (i = 0; i < n; i++) {
         if (mask == 0) {
-            if ((buf = fgetc(infile)) == EOF) return EOF;
+            buf = fgetc(infile);
+
+            if (buf == EOF) {
+                return EOF;
+            }
+            
             mask = 128;
         }
 
@@ -129,6 +134,7 @@ int getbit(int n) /* get n bits */
         if (buf & mask) {
             x++;
         }
+
         mask >>= 1;
     }
 
