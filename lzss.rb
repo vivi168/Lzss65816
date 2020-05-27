@@ -79,7 +79,6 @@ class Lzss
     def getbit(n)
         x = 0
 
-
         n.times do |i|
             if @mask == 0
                 @buf = fgetc
@@ -105,9 +104,6 @@ class Lzss
         (num || 0).to_s(16).rjust(rjust_len, '0').upcase
     end
 end
-
-
-
 
 l = Lzss.new('big.png.lzss', 'big2.png')
 l.decode
