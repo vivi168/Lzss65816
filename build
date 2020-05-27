@@ -1,0 +1,4 @@
+#!/bin/bash
+ruby -I../SNES_Utils/lib ../SNES_Utils/bin/vas -f lzss.asm
+
+cp out.smc  /mnt/c/Users/vbihl/Desktop/lzss.smc

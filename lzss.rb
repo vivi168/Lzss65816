@@ -105,6 +105,6 @@ class Lzss
     end
 end
 
-l = Lzss.new('big.png.lzss', 'big2.png')
+l = Lzss.new('assets/big.bin.lzss', 'assets/big2.bin')
 l.decode
 l.write
