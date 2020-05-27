@@ -4,8 +4,8 @@ class Lzss
     N = (1 << EI)       # buffer size
     F = ((1 << EJ) + 1) # lookahead buffer size
 
-    def initialize(source)
-        @filename = source
+    def initialize(source, dest)
+        @dest = dest
         @buffer = Array.new(N * 2)
 
         @infile = []
@@ -62,7 +62,7 @@ class Lzss
     end
 
     def write
-        File.open("#{@filename}.decoded", 'w+b') do |file|
+        File.open(@dest, 'w+b') do |file|
             file.write([@outfile.map { |i| hex(i) }.join].pack('H*'))
         end
     end
@@ -109,6 +109,6 @@ end
 
 
 
-l = Lzss.new('big.png.lzss')
+l = Lzss.new('big.png.lzss', 'big2.png')
 l.decode
 l.write
