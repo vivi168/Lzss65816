@@ -5,19 +5,69 @@ class Lzss
     F = ((1 << EJ) + 1) # lookahead buffer size
 
     def initialize(source)
+        @filename = source
         @buffer = Array.new(N * 2)
 
         @infile = []
         @infile_ptr = 0
+
+        @outfile = []
+
+        @buf = 0
+        @mask = 0
 
         File.open(source, 'r') do |f|
             f.each_byte do |byte|
                 @infile << byte
             end
         end
-
-        p @infile.size
     end
+
+    def decode
+        r = N - F
+        c = 0
+
+        r.times do |i|
+            @buffer[i] = 32
+        end
+
+        while c != nil
+            c = getbit(1)
+            if c == 1
+                byte = getbit(8)
+
+                break if (byte == nil)
+
+                @outfile << byte
+                @buffer[r] = byte
+                r = (r + 1) & (N - 1)
+
+            else
+                i = getbit(EI)
+                j = getbit(EJ)
+
+                break if (i == nil || j == nil)
+
+                0.upto(j+1) do |k|
+                    c = @buffer[(i + k) & (N - 1)]
+
+                    @outfile << c
+                    @buffer[r] = c
+                    r = (r + 1) & (N - 1)
+                end
+            end
+        end
+
+        @outfile
+    end
+
+    def write
+        File.open("#{@filename}.decoded", 'w+b') do |file|
+            file.write([@outfile.map { |i| hex(i) }.join].pack('H*'))
+        end
+    end
+
+    private
 
     def fgetc
         c = @infile[@infile_ptr]
@@ -28,39 +78,37 @@ class Lzss
 
     def getbit(n)
         x = 0
-        buf = 0
-        mask = 0
+
 
         n.times do |i|
-            if mask == 0
-                buf = fgetc
+            if @mask == 0
+                @buf = fgetc
 
-                return nil if (buf == nil)
+                return nil if (@buf == nil)
 
-                mask = 128
+                @mask = 128
             end
 
             x <<= 1
 
-            if (buf & mask) != 0
+            if (@buf & @mask) != 0
                 x += 1
             end
 
-            mask >>= 1
+            @mask >>= 1
         end
 
-        p x
         x
     end
 
-    def decode
-        c = 0
-        while c = getbit(8) != nil
-        end
+    def hex(num, rjust_len = 2)
+        (num || 0).to_s(16).rjust(rjust_len, '0').upcase
     end
 end
 
 
 
 
-p Lzss.new('big.encoded').decode
+l = Lzss.new('big.png.lzss')
+l.decode
+l.write
