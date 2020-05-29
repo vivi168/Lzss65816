@@ -19,6 +19,7 @@ mask:                   .rb 1
 
 infile:                 .rb 3   ; address of file to decompress
 infile_ptr:             .rb 2   ; index to current infile byte
+infile_siz:             .rb 2
 outfile_ptr:            .rb 2   ; index to current outfile byte
 
 .org 7e2000
@@ -57,11 +58,22 @@ ResetVector:
     sta 4200            ; NMITIMEN
     cli                 ; enable interrupts
 
-    jsr @LzssDecode
+    brk 00
+    ldy #000c
+    jsr @GetBit
+
+    ldy #000c
+    jsr @GetBit
+
+    ldy #000c
+    jsr @GetBit
+
+    ldy #000c
+    jsr @GetBit
 
     jmp @MainLoop       ; loop forever
 
-BrkVector:
+BreakVector:
     rti
 
 NmiVector:
@@ -70,6 +82,58 @@ NmiVector:
 
 MainLoop:
     jmp @MainLoop
+
+; get n bits from infile
+; n in Y
+; result in X
+GetBit:
+    ldx #0000
+
+getbit_loop:
+    lda @mask
+    bne @skip_fgetc
+
+    phy
+
+    ldy @infile_ptr
+    cpy @infile_siz
+    bcc @continue_getbit_loop
+ldx #ffff                        ; we return 0xffff (EOF) if infile_ptr >= infile_siz
+    ply
+    bra @end_getbit
+
+continue_getbit_loop:
+    lda [<infile],y
+
+    sta @buf
+    lda #80
+    sta @mask
+
+    iny
+    sty @infile_ptr
+    ply
+
+skip_fgetc:
+    rep #20
+    txa
+    asl
+    tax
+    sep #20
+
+    lda @mask
+    and @buf
+    beq @skip_inx
+
+    inx
+
+skip_inx:
+    lsr @mask
+
+    dey
+    bne @getbit_loop
+
+end_getbit:
+    rts
 
 LzssDecode:
     rts

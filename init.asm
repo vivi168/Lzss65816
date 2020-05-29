@@ -100,6 +100,20 @@ ClearRegisters:
     lda #11
     sta @F              ; F = ((1 << EJ) + 1) = 17
 
+    stz @buf
+    stz @mask
+    rep #20
+    stz @infile_ptr
+    stz @outfile_ptr
+    lda #097d           ; TODO: must include this value in compressed file header.
+    sta @infile_siz
+    sep #20
+
+    ldx #@compressed_map
+    stx @infile
+    lda #^compressed_map
+    sta @infile+2
+
     ; -----
 
     rts
