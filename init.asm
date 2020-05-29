@@ -91,17 +91,15 @@ ClearRegisters:
 
     ; ---- custom registers
 
-    stz @screen_tm_x
-    stz @screen_tm_y
-    stz @prev_screen_tm_x
-    stz @prev_screen_tm_y
-    stz @screen_x_velocity
-    stz @screen_y_velocity
-    rep #20
-    stz @screen_m_x
-    stz @screen_m_y
-    stz @prev_screen_m_x
-    stz @prev_screen_m_y
-    sep #20
+    lda #0b
+    sta @EI
+    lda #04
+    sta @EJ
+    ldx #0800
+    stx @N              ; N = (1 << EI) = 2048
+    lda #11
+    sta @F              ; F = ((1 << EJ) + 1) = 17
+
+    ; -----
 
     rts

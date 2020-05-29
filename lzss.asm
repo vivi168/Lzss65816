@@ -5,11 +5,26 @@
 .org 018000
 .base 8000
 
-compressed_map:         .incbin big.bin.lzss
+compressed_map:         .incbin assets/big.bin.lzss
+
+.org 7e0000
+
+EI:                     .rb 1
+EJ:                     .rb 1
+N:                      .rb 2
+F:                      .rb 1
+
+buf:                    .rb 1
+mask:                   .rb 1
+
+infile:                 .rb 3   ; address of file to decompress
+infile_ptr:             .rb 2   ; index to current infile byte
+outfile_ptr:            .rb 2   ; index to current outfile byte
 
 .org 7e2000
 
-decompression_buffer: .rb 4000
+buffer:                 .rb 1000
+outfile:                .rb 4000
 
 .org 8000
 .base 0000
@@ -42,7 +57,7 @@ ResetVector:
     sta 4200            ; NMITIMEN
     cli                 ; enable interrupts
 
-    jmp @LzssDecode
+    jsr @LzssDecode
 
     jmp @MainLoop       ; loop forever
 
