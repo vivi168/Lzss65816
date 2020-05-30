@@ -5,6 +5,7 @@
 .org 018000
 .base 8000
 
+compressed_map_siz:     .db 097d
 compressed_map:         .incbin assets/big.bin.lzss
 
 .org 7e0000
@@ -13,6 +14,10 @@ EI:                     .rb 1
 EJ:                     .rb 1
 N:                      .rb 2
 F:                      .rb 1
+
+r:                      .rb 2
+i:                      .rb 2
+j:                      .rb 2
 
 buf:                    .rb 1
 mask:                   .rb 1

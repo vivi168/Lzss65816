@@ -99,13 +99,15 @@ ClearRegisters:
     stx @N              ; N = (1 << EI) = 2048
     lda #11
     sta @F              ; F = ((1 << EJ) + 1) = 17
+    ldx #07ef
+    stx @r
 
     stz @buf
     stz @mask
     rep #20
     stz @infile_ptr
     stz @outfile_ptr
-    lda #097d           ; TODO: must include this value in compressed file header.
+    lda !compressed_map_siz
     sta @infile_siz
     sep #20
 
