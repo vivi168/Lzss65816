@@ -103,7 +103,7 @@ getbit_loop:
     ldy @infile_ptr
     cpy @infile_siz
     bcc @continue_getbit_loop
-ldx #ffff                        ; we return 0xffff (EOF) if infile_ptr >= infile_siz
+    ldx #ffff                        ; we return 0xffff (EOF) if infile_ptr >= infile_siz
     ply
     bra @end_getbit
 
