@@ -66,6 +66,8 @@ ResetVector:
     sta 4200            ; NMITIMEN
     cli                 ; enable interrupts
 
+    jsr @LzssDecode
+
     jmp @MainLoop       ; loop forever
 
 BreakVector:
@@ -93,7 +95,7 @@ getbit_loop:
     ldy @infile_idx
     cpy @infile_siz
     bcc @continue_getbit_loop
-    ldx #ffff                        ; we return 0xffff (EOF) if infile_idx >= infile_siz
+    ldx #ffff           ; we return 0xffff (EOF) if infile_idx >= infile_siz
     ply
     bra @end_getbit
 
@@ -131,6 +133,59 @@ end_getbit:
     rts
 
 LzssDecode:
+    lda #20
+    ldy @r
+    iny
+clear_buffer_loop:
+    dey
+    sta [<buffer_addr],y
+    bne @clear_buffer_loop
+
+brk 00
+
+decode_loop:
+    ldy #0001
+    jsr @GetBit         ; c = getbit(1)
+
+    cpx #ffff
+    beq @decode_done    ; if (c == EOF)
+
+    cpx #0001
+    beq @bit_is_one     ; if (c == 1)
+
+    ; ---- c == 0
+
+
+    bra @decode_loop
+
+bit_is_one:
+    ; ---- c == 1
+    ldy #0008
+    jsr @GetBit
+    cpx #ffff
+    beq @decode_done
+
+    txa
+    ldy @outfile_idx
+    sta [<outfile_addr],y
+
+    ldy @r
+    sta [<buffer_addr],y
+
+    rep #20
+    ; r = (r + 1) & (N - 1)
+    inc @r
+    lda @N
+    dec
+    and @r
+    sta @r
+
+    inc @outfile_idx
+    sep #20
+
+    bra @decode_loop
+
+decode_done:
     rts
 
 .include init.asm
