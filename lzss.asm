@@ -23,9 +23,12 @@ buf:                    .rb 1
 mask:                   .rb 1
 
 infile:                 .rb 3   ; address of file to decompress
-infile_ptr:             .rb 2   ; index to current infile byte
+infile_idx:             .rb 2   ; index to current infile byte
 infile_siz:             .rb 2
-outfile_ptr:            .rb 2   ; index to current outfile byte
+
+buffer_addr:            .rb 3   ; address of buffer
+outfile_addr:           .rb 3   ; address of outfile
+outfile_idx:            .rb 2   ; index to current outfile byte
 
 .org 7e2000
 
@@ -63,19 +66,6 @@ ResetVector:
     sta 4200            ; NMITIMEN
     cli                 ; enable interrupts
 
-    brk 00
-    ldy #000c
-    jsr @GetBit
-
-    ldy #000c
-    jsr @GetBit
-
-    ldy #000c
-    jsr @GetBit
-
-    ldy #000c
-    jsr @GetBit
-
     jmp @MainLoop       ; loop forever
 
 BreakVector:
@@ -100,10 +90,10 @@ getbit_loop:
 
     phy
 
-    ldy @infile_ptr
+    ldy @infile_idx
     cpy @infile_siz
     bcc @continue_getbit_loop
-    ldx #ffff                        ; we return 0xffff (EOF) if infile_ptr >= infile_siz
+    ldx #ffff                        ; we return 0xffff (EOF) if infile_idx >= infile_siz
     ply
     bra @end_getbit
 
@@ -115,7 +105,7 @@ continue_getbit_loop:
     sta @mask
 
     iny
-    sty @infile_ptr
+    sty @infile_idx
     ply
 
 skip_fgetc:

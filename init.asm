@@ -100,13 +100,13 @@ ClearRegisters:
     lda #11
     sta @F              ; F = ((1 << EJ) + 1) = 17
     ldx #07ef
-    stx @r
+    stx @r              ; r = N - F
 
     stz @buf
     stz @mask
     rep #20
-    stz @infile_ptr
-    stz @outfile_ptr
+    stz @infile_idx
+    stz @outfile_idx
     lda !compressed_map_siz
     sta @infile_siz
     sep #20
@@ -115,6 +115,16 @@ ClearRegisters:
     stx @infile
     lda #^compressed_map
     sta @infile+2
+
+    ldx #@buffer
+    stx @buffer_addr
+    lda #^buffer
+    sta @buffer_addr+2
+
+    ldx #@outfile
+    stx @outfile_addr
+    lda #^outfile
+    sta @outfile_addr+2
 
     ; -----
 
