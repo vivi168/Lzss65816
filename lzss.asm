@@ -75,7 +75,16 @@ BreakVector:
     rti
 
 NmiVector:
+    php
+    rep #30
+    pha
+
+    sep #20
     lda 4210            ; RDNMI
+
+    rep #30
+    pla
+    plp
     rti
 
 MainLoop:
