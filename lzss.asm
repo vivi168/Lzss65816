@@ -18,6 +18,7 @@ F:                      .rb 1
 r:                      .rb 2
 i:                      .rb 2
 j:                      .rb 2
+k:                      .rb 2
 
 buf:                    .rb 1
 mask:                   .rb 1
@@ -141,8 +142,6 @@ clear_buffer_loop:
     sta [<buffer_addr],y
     bne @clear_buffer_loop
 
-brk 00
-
 decode_loop:
     ldy #0001
     jsr @GetBit         ; c = getbit(1)
@@ -154,7 +153,28 @@ decode_loop:
     beq @bit_is_one     ; if (c == 1)
 
     ; ---- c == 0
+    lda @EI
+    rep #20
+    and #00ff
+    tay
+    sep #20
+    jsr @GetBit
+    cpx #ffff
+    beq @decode_done
+    stx @i
 
+    lda @EJ
+    rep #20
+    and #00ff
+    tay
+    sep #20
+    jsr @GetBit
+    cpx #ffff
+    beq @decode_done
+    stx @j
+
+    brk 00
+    jsr @BufferLoop
 
     bra @decode_loop
 
@@ -186,6 +206,53 @@ bit_is_one:
     bra @decode_loop
 
 decode_done:
+    rts
+
+
+BufferLoop:
+    inx
+    inx
+    stx @k
+    ldy #0000
+buffer_loop:
+    phy
+
+    rep #20
+    tya
+    clc
+    adc @i
+    pha
+    lda @N
+    dec
+    and 01,s
+    tay
+    pla
+    sep #20
+
+    lda [<buffer_addr],y
+    ldy @outfile_idx
+    sta [<outfile_addr],y
+
+    ldy @r
+    sta [<buffer_addr],y
+
+    rep #20
+    ; r = (r + 1) & (N - 1)
+    inc @r
+    lda @N
+    dec
+    and @r
+    sta @r
+
+    inc @outfile_idx
+    sep #20
+
+    ply
+    iny
+    cpy @k
+
+    bne @buffer_loop
+
     rts
 
 .include init.asm
